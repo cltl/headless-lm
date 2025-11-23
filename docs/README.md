@@ -1,16 +1,25 @@
 # headless-lm: Better and Faster LM pretraining
 
-This repository is a fork of [NathanGodey/headless-lm](https://github.com/NathanGodey/headless-lm) containing training and evaluation code for the paper ["Headless Language Models: Learning without Predicting with Contrastive Weight Tying"](https://arxiv.org/abs/2309.08351). See also the [README](./docs/README.md).
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Encoder-yellow)](https://huggingface.co/nthngdy/headless-bert-bs64-owt2)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Decoder-yellow)](https://huggingface.co/nthngdy/headless-pythia-owt2-70m-ft)
+[![arXiv](https://img.shields.io/badge/arXiv-2309.08351-b31b1b.svg)](https://arxiv.org/abs/2309.08351)
 
-## Setting up on Slurm
 
-Run [setup-venv.sh](./scripts/setup-venv.sh) to install a virtual environment on Snellius. Note that the requirements.txt have been adapted.
+This repository contains training and evaluation code for the paper ["Headless Language Models: Learning without Predicting with Contrastive Weight Tying"](https://arxiv.org/abs/2309.08351).
 
+Paper abstract:
+> Self-supervised pre-training of language models usually consists in predicting probability distributions over extensive token vocabularies. In this study, we propose an innovative method that shifts away from probability prediction and instead focuses on reconstructing input embeddings in a contrastive fashion via Constrastive Weight Tying (CWT). We apply this approach to pretrain Headless Language Models in both monolingual and multilingual contexts. Our method offers practical advantages, substantially reducing training computational requirements by up to 20 times, while simultaneously enhancing downstream performance and data efficiency. We observe a significant +1.6 GLUE score increase and a notable +2.7 LAMBADA accuracy improvement compared to classical LMs within similar compute budgets.
+
+<br>
+
+![](./imgs/hlm_schema.svg)
+
+## Install environment
+
+Make sure you have Python>=3.9 and Cuda>=11.2 installed. Then run:
 ```bash
-sbatch scripts/setup-venv.sh
+pip install -r requirements.txt
 ```
-
-*The following instructions are from the original [README](./docs/README.md)*
 
 ## Preprocess data
 Adapt the config file in `configs/preprocess_owt2.json` to your specific case, and then run:
