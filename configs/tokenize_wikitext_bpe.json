@@ -1,0 +1,8 @@
+{
+  "dataset": "wikitext",
+  "dataset_config": "wikitext-103-raw-v1",
+  "dataset_name": "wikitext103",
+  "tokenizer_type": "BPE",
+  "save_dir": "tokenizers",
+  "vocab_size": 50000
+}

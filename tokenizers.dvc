@@ -1,0 +1,6 @@
+outs:
+- md5: 466fea16f34c8448069ab595aaab57f5.dir
+  size: 3499566
+  nfiles: 3
+  hash: md5
+  path: tokenizers

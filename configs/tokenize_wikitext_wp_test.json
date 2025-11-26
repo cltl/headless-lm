@@ -1,0 +1,8 @@
+{
+  "dataset": "wikitext",
+  "dataset_config": "wikitext-2-raw-v1",
+  "dataset_name": "wikitext2",
+  "tokenizer_type": "WordPiece",
+  "save_dir": "tokenizers",
+  "vocab_size": 25000
+}
