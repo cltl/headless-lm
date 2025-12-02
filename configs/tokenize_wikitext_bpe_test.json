@@ -1,7 +1,7 @@
 {
   "dataset": "wikitext",
   "dataset_config": "wikitext-2-raw-v1",
-  "dataset_name": "wikitext2",
+  "tokenizer_name": "wikitext2-BPE-25k",
   "tokenizer_type": "BPE",
   "save_dir": "tokenizers",
   "vocab_size": 25000

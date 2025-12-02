@@ -1,0 +1,14 @@
+{
+  "num_gpus": 1,
+  "gpu_bs": 32,
+  "num_workers": 17,
+  "accu_grad_batches": 8,
+  "dataset": "datasets/wikitext103-bpe_128.hf",
+  "hf_tokenizer": "CLTL/wikitext103-BPE-50k",
+  "hf_path": "google-bert/bert-base-uncased",
+  "accelerator": "hf",
+  "precision": "16-mixed",
+  "ckpt_save_dir": "ckpts/mlm_headless/wikitext103",
+  "run_name": "wikitext103-bpe_128",
+  "ckpt_every": 50000
+}

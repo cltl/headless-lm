@@ -1,0 +1,8 @@
+{
+  "dataset_name": "wikitext",
+  "dataset_config": "wikitext-103-raw-v1",
+  "hf_tokenizer": "CLTL/wikitext103-BPE-50k",
+  "output": "./datasets/wikitext103-bpe_128.hf",
+  "max_seq_len": 128,
+  "num_workers": 4
+}

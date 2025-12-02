@@ -19,3 +19,6 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 pip list
 pip install -r $wdir/requirements.txt
 
+# Downgrade markupsafe for preprocess.py
+pip install markupsafe==2.0.1
+

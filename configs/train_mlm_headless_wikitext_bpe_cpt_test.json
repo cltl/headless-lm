@@ -1,0 +1,15 @@
+{
+  "num_gpus": 1,
+  "gpu_bs": 16,
+  "num_workers": 17,
+  "accu_grad_batches": 2,
+  "dataset": "datasets/wikitext2-bpe.hf",
+  "hf_tokenizer": "CLTL/wikitext103-BPE-50k",
+  "hf_path": "google-bert/bert-base-uncased",
+  "accelerator": "hf",
+  "precision": "16-mixed",
+  "ckpt_save_dir": "checkpoints/mlm_headless",
+  "run_name": "wikitext2-bpe_from_epoch=2-step=150",
+  "ckpt_every": 30,
+  "ckpt_path": "checkpoints/epoch=2-step=150.ckpt"
+}

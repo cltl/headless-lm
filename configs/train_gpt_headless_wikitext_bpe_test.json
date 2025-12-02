@@ -1,0 +1,14 @@
+{
+  "num_gpus": 1,
+  "gpu_bs": 16,
+  "num_workers": 18,
+  "accu_grad_batches": 1,
+  "dataset": "datasets/wikitext103-bpe.hf",
+  "hf_tokenizer": "CLTL/wikitext103-BPE-50k",
+  "hf_path": "EleutherAI/pythia-70m",
+  "accelerator": "hf",
+  "precision": "16-mixed",
+  "ckpt_save_dir": "ckpts/gpt_headless_wiki103",
+  "run_name": "wikitext103-bpe",
+  "ckpt_every": 1000
+}

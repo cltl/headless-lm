@@ -10,6 +10,29 @@ Run [setup-venv.sh](./scripts/setup-venv.sh) to install a virtual environment on
 sbatch scripts/setup-venv.sh
 ```
 
+## Tokenizer training
+
+Run `create_tokenizer.py` with a config file like [./configs/tokenize_wikitext_bpe.json](./configs/tokenize_wikitext_bpe.json)
+```
+python create_tokenizer.py -c configs/tokenize_wikitext_bpe.json
+```
+The tokenizer is saved in the `save_dir` directory as specified in the config file, e.g., `tokenizers`. 
+To upload a tokenizer `wikitext103-BPE-50k` to HuggingFace, identify with 
+
+```
+$ cd tokenizers
+$ hf auth login
+```
+
+Launch python:
+```
+(.venv)$ python
+>>> from transformers import AutoTokenizer
+>>> tokenizer = AutoTokenizer.from_pretrained("wikitext103-BPE-50k")
+>>> tokenizer.push_to_hub("wikitext103-BPE-50k")
+```
+See HuggingFace instructions [here](https://huggingface.co/learn/llm-course/en/chapter6/2#saving-the-tokenizer).
+
 *The following instructions are from the original [README](./docs/README.md)*
 
 ## Preprocess data
