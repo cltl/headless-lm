@@ -20,9 +20,10 @@ ds_config = config["dataset_config"]
 hf_tokenizer = config["hf_tokenizer"]
 max_seq_len = config["max_seq_len"]
 output = config["output"]
+num_workers = config["num_workers"]
 
-NUM_CPU = psutil.cpu_count()
-print(f"Using {NUM_CPU} CPUs...")
+#NUM_CPU = psutil.cpu_count()
+#print(f"Using {NUM_CPU} CPUs...")
 
 tokenizer = AutoTokenizer.from_pretrained(hf_tokenizer)
 
@@ -36,9 +37,9 @@ print("Loading dataset...")
 ds = load_dataset(ds_name, ds_config)
 
 print("Packing dataset...")
-ds = ds.map(lambda x: {"packed":tokenize_and_pack(x)}, remove_columns=ds['train'].column_names, batched=True, batch_size=100000, num_proc=NUM_CPU)
+ds = ds.map(lambda x: {"packed":tokenize_and_pack(x)}, remove_columns=ds['train'].column_names, batched=True, batch_size=100000, num_proc=num_workers)
 
 ds = ds.shuffle()
 
 print("Saving dataset...")
-ds.save_to_disk(output, num_proc=NUM_CPU)
+ds.save_to_disk(output, num_proc=num_workers)
