@@ -6,7 +6,12 @@ import torch.nn.functional as F
 from transformers import get_linear_schedule_with_warmup
 import engine.tasks.pretraining.utils as loss_fns
 from functools import partial
-from engine.tasks.pretraining.utils import prob_mask_like, mask_with_tokens, get_mask_subset_with_prob, markup_curate
+from engine.tasks.pretraining.utils import (
+    prob_mask_like,
+    mask_with_tokens,
+    get_mask_subset_with_prob,
+    markup_curate,
+)
 
 
 @dataclass
@@ -57,27 +62,32 @@ class MlmHeadlessPretraining(Task):
         self.total_nb_steps = 1e6
         self.adam_betas = [0.9, 0.999]
 
-        self.emb_loss_weight = 1.
-        self.mlm_loss_weight = 1.
+        self.emb_loss_weight = 1.0
+        self.mlm_loss_weight = 1.0
         self.loss_name = "cwt"
-        self.contrastive_temperature = 1.
+        self.contrastive_temperature = 1.0
 
         self.load_config(config)
 
-        self.mask_ignore_token_ids = set([*self.mask_ignore_token_ids, self.pad_token_id])
+        self.mask_ignore_token_ids = set(
+            [*self.mask_ignore_token_ids, self.pad_token_id]
+        )
         self.contrastive_loss_fn = getattr(loss_fns, f"{self.loss_name}_loss")
         if self.loss_name == "cwt":
-            self.contrastive_loss_fn = partial(self.contrastive_loss_fn, temperature=self.contrastive_temperature)
-        if self.mlm_loss_weight == 0.:
+            self.contrastive_loss_fn = partial(
+                self.contrastive_loss_fn, temperature=self.contrastive_temperature
+            )
+        if self.mlm_loss_weight == 0.0:
             self.mlm_model.cls = nn.Identity()
-        
         print(self.mlm_model)
-
 
     def _randomize_mask_input(self, input):
         random_token_prob = prob_mask_like(input, self.random_token_prob)
-        random_tokens = torch.randint(0, self.num_tokens, input.shape, device=input.device)
-        random_no_mask = mask_with_tokens(random_tokens, self.mask_ignore_token_ids)
+        random_tokens = torch.randint(
+            0, self.num_tokens, input.shape, device=input.device
+        )
+        random_no_mask = mask_with_tokens(
+            random_tokens, self.mask_ignore_token_ids)
         random_token_prob &= ~random_no_mask
         random_indices = torch.nonzero(random_token_prob, as_tuple=True)
         input[random_indices] = random_tokens[random_indices]
@@ -116,21 +126,28 @@ class MlmHeadlessPretraining(Task):
         self.device = self.mlm_model.device
         if self.tokenized:
             return torch.stack(input[self.text_key]).T
-        return self.tokenizer(input[self.text_key], return_tensors='pt', padding=True,
-                              truncation=True, max_length=self.max_seq_len,
-                              **kwargs).input_ids.to(self.device)
+        return self.tokenizer(
+            input[self.text_key],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=self.max_seq_len,
+            **kwargs,
+        ).input_ids.to(self.device)
 
     def loss(self, input, global_step, **kwargs):
         b, t = input.shape
         if t > self.max_seq_len:
-            ratio = t//self.max_seq_len
-            input = input.reshape((b*ratio, t//ratio))
+            ratio = t // self.max_seq_len
+            input = input.reshape((b * ratio, t // ratio))
 
         masked_input = input.clone().detach()
 
         # if random token probability > 0 for mlm
         if self.random_token_prob > 0:
-            assert self.num_tokens is not None, 'Number of tokens (num_tokens) must be passed to Electra for randomizing tokens during masked language modeling'
+            assert self.num_tokens is not None, (
+                "Number of tokens (num_tokens) must be passed to Electra for randomizing tokens during masked language modeling"
+            )
             self._randomize_mask_input(masked_input)
 
         masked_input, mlm_labels, mask, _ = self._mask_input(masked_input)
@@ -145,20 +162,15 @@ class MlmHeadlessPretraining(Task):
             embs = self.mlm_model.get_input_embeddings()
             target_input_embeddings = embs(input)[mask]
             emb_loss = self.contrastive_loss_fn(
-                emb_prediction,
-                target_input_embeddings
-            )
+                emb_prediction, target_input_embeddings)
         else:
-            emb_loss = 0.
-        
+            emb_loss = 0.0
+
         if self.mlm_loss_weight != 0:
             logits = mlm_result.logits
-            mlm_loss = F.cross_entropy(
-                logits.transpose(1, 2),
-                mlm_labels
-            )
+            mlm_loss = F.cross_entropy(logits.transpose(1, 2), mlm_labels)
         else:
-            mlm_loss = 0.
+            mlm_loss = 0.0
 
         # gather metrics
 
@@ -166,10 +178,11 @@ class MlmHeadlessPretraining(Task):
             mlm_predictions = []
             if self.mlm_loss_weight != 0:
                 mlm_predictions = torch.argmax(logits, dim=-1)
-                mlm_acc = (mlm_labels[mask] == mlm_predictions[mask]).float().mean()
+                mlm_acc = (mlm_labels[mask] ==
+                           mlm_predictions[mask]).float().mean()
             else:
-                mlm_acc = 0.
-            
+                mlm_acc = 0.0
+
             cosines = []
             for representations in mlm_result.hidden_states:
                 if self.trainer.state.stage == "validate":
@@ -177,65 +190,91 @@ class MlmHeadlessPretraining(Task):
                     rand = torch.rand(len(representations))
                     indicA = rand.topk(50).indices
                     indicB = (-rand).topk(50).indices
-                    all_cosine = torch.nn.functional.cosine_similarity(representations[indicA], representations[indicB])
+                    all_cosine = torch.nn.functional.cosine_similarity(
+                        representations[indicA], representations[indicB]
+                    )
                     cosines.append(all_cosine.mean())
                 else:
-                    cosines.append(0.)
+                    cosines.append(0.0)
 
         return MlmLossLogs(
-            total_loss=self.mlm_loss_weight*mlm_loss+self.emb_loss_weight*emb_loss,
+            total_loss=self.mlm_loss_weight * mlm_loss
+            + self.emb_loss_weight * emb_loss,
             mlm_loss=mlm_loss,
             emb_loss=emb_loss,
             inputs=input,
             mlm_mask=mask,
             outputs=mlm_predictions,
             mlm_accuracy=mlm_acc,
-            optimization={f"avg_cosine_l{i}": cosines[i] for i in range(len(cosines))}
+            optimization={
+                f"avg_cosine_l{i}": cosines[i] for i in range(len(cosines))},
         )
 
     def display_sample(self, sample, num_samples):
         sample_tokens_ids = sample.outputs[:num_samples]
         sample_input_ids = sample.inputs[:num_samples]
 
-        sample_tokens_decoded = [self.tokenizer.convert_ids_to_tokens(di, skip_special_tokens=True) for di in sample_tokens_ids]
-        sample_input_decoded = [self.tokenizer.convert_ids_to_tokens(di, skip_special_tokens=True) for di in sample_input_ids]
+        sample_tokens_decoded = [
+            self.tokenizer.convert_ids_to_tokens(di, skip_special_tokens=True)
+            for di in sample_tokens_ids
+        ]
+        sample_input_decoded = [
+            self.tokenizer.convert_ids_to_tokens(di, skip_special_tokens=True)
+            for di in sample_input_ids
+        ]
 
         for sample_idx in range(len(sample_tokens_decoded)):
-            zipped_iter = zip(sample_tokens_decoded[sample_idx], sample_input_decoded[sample_idx])
+            zipped_iter = zip(
+                sample_tokens_decoded[sample_idx], sample_input_decoded[sample_idx]
+            )
             for idx, (pred, label) in enumerate(zipped_iter):
-                if idx >= len(sample_tokens_decoded[sample_idx]) or label == 0 and pred == 0:
+                if (
+                    idx >= len(sample_tokens_decoded[sample_idx])
+                    or label == 0
+                    and pred == 0
+                ):
                     continue
-                label_tag = '≠' if label else '='
-                pred_tag = '✅' if pred == label else '❌'
-                sample_tokens_decoded[sample_idx][idx] = markup_curate(sample_tokens_decoded[sample_idx][idx])
-                sample_tokens_decoded[sample_idx][idx] += f'({label_tag} / {pred_tag})'
+                label_tag = "≠" if label else "="
+                pred_tag = "✅" if pred == label else "❌"
+                sample_tokens_decoded[sample_idx][idx] = markup_curate(
+                    sample_tokens_decoded[sample_idx][idx]
+                )
+                sample_tokens_decoded[sample_idx][idx] += f"({label_tag} / {pred_tag})"
 
-        disc_input_decoded = [self.tokenizer.convert_tokens_to_string(di) for di in sample_tokens_decoded]
+        disc_input_decoded = [
+            self.tokenizer.convert_tokens_to_string(di) for di in sample_tokens_decoded
+        ]
         return disc_input_decoded
 
     def init_heads():
         return
 
     def configure_optimizers(self):
-        self.param_groups = [{"params": self.mlm_model.parameters(),
-                              'name': 'mlm_wd',
-                              'weight_decay': self.weight_decay},
-                              {"params": self.emb_predictor.parameters(),
-                              'name': 'emb_pred',
-                              'weight_decay': self.weight_decay}]
+        self.param_groups = [
+            {
+                "params": self.mlm_model.parameters(),
+                "name": "mlm_wd",
+                "weight_decay": self.weight_decay,
+            },
+            {
+                "params": self.emb_predictor.parameters(),
+                "name": "emb_pred",
+                "weight_decay": self.weight_decay,
+            },
+        ]
 
-        adam_opt = torch.optim.AdamW(self.param_groups,
-                                     lr=self.learning_rate,
-                                     betas=self.adam_betas,
-                                     weight_decay=self.weight_decay)
+        adam_opt = torch.optim.AdamW(
+            self.param_groups,
+            lr=self.learning_rate,
+            betas=self.adam_betas,
+            weight_decay=self.weight_decay,
+        )
         lr_scheduler_func = get_linear_schedule_with_warmup(
-            adam_opt,
-            self.warmup_steps,
-            self.total_nb_steps
+            adam_opt, self.warmup_steps, self.total_nb_steps
         )
         lr_scheduler = {
-            'scheduler': lr_scheduler_func,
-            'interval': 'step',
-            'frequency': 1
+            "scheduler": lr_scheduler_func,
+            "interval": "step",
+            "frequency": 1,
         }
         return [adam_opt], [lr_scheduler]

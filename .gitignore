@@ -3,3 +3,4 @@ logs
 lightning_logs/
 __pycache__/
 /tokenizers
+/datasets
