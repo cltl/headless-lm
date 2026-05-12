@@ -10,5 +10,5 @@
   "precision": "16-mixed",
   "ckpt_save_dir": "ckpts/mlm_headless/wikitext103",
   "run_name": "wikitext103-bpe_128",
-  "ckpt_every": 50000
+  "ckpt_every": 25000
 }

@@ -8,7 +8,7 @@
   "hf_path": "EleutherAI/pythia-70m",
   "accelerator": "hf",
   "precision": "16-mixed",
-  "ckpt_save_dir": "ckpts/gpt_headless_wiki103",
+  "ckpt_save_dir": "ckpts/gpt_vanilla_wiki103",
   "run_name": "wikitext103-bpe",
   "ckpt_every": 500
 }

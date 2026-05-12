@@ -34,7 +34,7 @@ logger.info(f"job config:\n{job_config}")
 dataset = job_config["dataset"]
 hf_tokenizer = job_config["hf_tokenizer"]
 num_gpus = int(job_config.get("num_gpus", 1))
-# num_workers = int(job_config.get("num_workers", 1))
+num_workers = int(job_config.get("num_workers", 1))
 ckpt_path = job_config.get("ckpt_path", None)
 accu_grad_batches = int(job_config.get("accu_grad_batches", 1))
 gpu_bs = int(job_config.get("gpu_bs", 16))
@@ -77,7 +77,8 @@ datamodule = DataModule.from_datasets(
     infer_batch_size=gpu_bs,
     split_names=["train", "validation", "test"],
     from_disk=True,
-    num_workers=0,
+    num_workers=num_workers,
+    # num_workers=0,
 )
 
 
@@ -100,7 +101,6 @@ checkpoints = [
         save_top_k=-1,
     ),
     ModelCheckpoint(
-        every_n_train_steps=1000,
         dirpath=f"{ckpt_save_dir}/{run_name}",
         save_top_k=1,
     ),

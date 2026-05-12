@@ -2,7 +2,7 @@
 #SBATCH --partition=gpu_a100
 #SBATCH --cpus-per-task=18
 #SBATCH --gpus=1
-#SBATCH --time=20:00:00
+#SBATCH --time=30:00:00
 #SBATCH --output=logs/mlm_headless_2.log
 
 wdir=$HOME/headless-lm
@@ -21,10 +21,9 @@ cd $TMPDIR
 mkdir datasets
 # cp -r $wdir/datasets/wikitext2-bpe.hf datasets
 # srun python $wdir/mlm_headless.py -c $wdir/configs/mlm_headless_test.json -j $wdir/configs/train_mlm_headless_wikitext_bpe_test.json
-cp -r $wdir/datasets/wikitext103-bpe.hf datasets
+cp -r $wdir/datasets/wikitext103-bpe_128.hf datasets
 srun python $wdir/mlm_headless.py -c $wdir/configs/mlm_headless.json -j $wdir/configs/train_mlm_headless_wikitext103_bpe.json
 
 ls -l
-cd ..
 cp -r ckpts/* $wdir/checkpoints
 [[ -d wandb ]] && cp -r wandb $wdir
