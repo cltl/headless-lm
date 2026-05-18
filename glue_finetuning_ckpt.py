@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 os.environ['TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD']='1'
+os.environ['TOKENIZERS_PARALLELISM'] = "false"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--config")
@@ -49,7 +50,7 @@ backbone = model
 
 def main():
   GlueBenchmark(tokenizer, backbone, logger='wandb', logger_args={'project': 'GLUE'+run_name}, train_batch_size=batch_size, accumulate_grad_batches=1,
-        learning_rate=learning_rate, deterministic=deterministic
+        learning_rate=learning_rate, deterministic=deterministic, num_workers=17
     )
 
 if __name__ =='__main__':

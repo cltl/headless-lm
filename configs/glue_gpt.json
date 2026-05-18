@@ -1,0 +1,7 @@
+{
+  "batch_size": 32,
+  "mode": "lm",
+  "learning_rate": 1e-5,
+  "deterministic": true,
+  "seed": 42
+}

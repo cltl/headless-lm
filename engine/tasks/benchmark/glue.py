@@ -94,6 +94,7 @@ class GlueBenchmark:
         logger="tensorboard",
         logger_args=None,
         learning_rate=None,
+        num_workers=17,
         devices="auto",
     ):
         self.tokenizer = tokenizer
@@ -118,6 +119,7 @@ class GlueBenchmark:
         self.deterministic = deterministic
         self.devices = devices
         self.run_metrics = [f"hp/{task_name}_score" for task_name in _GLUE_TASK_CONFIG]
+        self.num_workers = num_workers
 
         self.fit()
 
@@ -139,6 +141,7 @@ class GlueBenchmark:
                 task_name,
                 train_batch_size=self.train_batch_size,
                 infer_batch_size=self.infer_batch_size,
+                num_workers=self.num_workers,
                 **task_attr.get("datamodule_config", {}),
             )
 
