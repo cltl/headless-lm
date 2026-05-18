@@ -1,7 +1,5 @@
-from engine.tasks.classification import (
-    SentenceClassification,
-    SentencePairClassification,
-)
+from engine.tasks.benchmark.classification.nli import SentencePairClassification
+from engine.tasks.benchmark.classification.sentence import SentenceClassification
 from engine.tasks.regression.sts import TextualSimilarity
 from engine.data import DataModule
 from engine.lit.lightning_module import TaskTrainer
@@ -9,6 +7,8 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from engine.lit.task_logging import TensorBoardLogger, WandbLogger
 import os
 import copy
+import torch
+torch.set_float32_matmul_precision('high')
 
 _GLUE_TASK_CONFIG = {
     # "wnli": {
@@ -89,10 +89,12 @@ class GlueBenchmark:
         train_batch_size=8,
         infer_batch_size=32,
         accumulate_grad_batches=4,
+        deterministic=False,
         version=None,
         logger="tensorboard",
         logger_args=None,
         learning_rate=None,
+        devices="auto",
     ):
         self.tokenizer = tokenizer
         self.backbone = backbone
@@ -113,7 +115,8 @@ class GlueBenchmark:
         self.infer_batch_size = infer_batch_size
         self.accumulate_grad_batches = accumulate_grad_batches
         self.learning_rate = learning_rate
-
+        self.deterministic = deterministic
+        self.devices = devices
         self.run_metrics = [f"hp/{task_name}_score" for task_name in _GLUE_TASK_CONFIG]
 
         self.fit()
@@ -152,11 +155,9 @@ class GlueBenchmark:
             )
             trainer.fit(
                 task_datamodule,
-                gpus=1,
-                num_nodes=1,
-                strategy="auto",
                 accumulate_grad_batches=self.accumulate_grad_batches,
                 callbacks=[checkpoint_callback],
+                deterministic=self.deterministic,
                 max_epochs=task_attr.get("nb_epochs", 10),
             )
             best_score = checkpoint_callback.best_model_score
