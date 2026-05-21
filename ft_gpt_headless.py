@@ -36,7 +36,7 @@ accu_grad_batches = int(job_config.get("accu_grad_batches", 1))
 gpu_bs = int(job_config.get("gpu_bs", 16))
 run_name = job_config.get("run_name", "test")
 precision = job_config.get("precision", "16-mixed")
-ckpt_every = job_config.get("ckpt_every", 50)
+ckpt_every = job_config.get("ckpt_every", 25)
 ckpt_save_dir = job_config.get("ckpt_save_dir", "ckpts")
 mode = job_config.get("mode", "ft")
 seed = int(job_config.get("seed", 57))
@@ -87,7 +87,9 @@ checkpoints = [
         save_top_k=-1,
     ),
     ModelCheckpoint(
-        every_n_train_steps=1000, dirpath=f"{ckpt_save_dir}/{run_name}", save_top_k=1
+        every_n_train_steps=ckpt_every,
+        dirpath=f"{ckpt_save_dir}/{run_name}",
+        save_top_k=1,
     ),
 ]
 
@@ -97,7 +99,7 @@ trainer.fit(
     accumulate_grad_batches=accu_grad_batches,
     callbacks=checkpoints,
     limit_val_batches=10,
-    val_check_interval=2500,
+    val_check_interval=25,
     gradient_clip_val=1.0,
     benchmark=True,
     default_root_dir=f"{ckpt_save_dir}/{run_name}",

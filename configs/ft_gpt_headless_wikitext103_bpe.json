@@ -3,6 +3,7 @@
   "gpu_bs": 8,
   "num_workers": 17,
   "accu_grad_batches": 32,
+  "total_nb_steps": 150,
   "dataset": "datasets/wikitext103-bpe.hf",
   "hf_tokenizer": "CLTL/wikitext103-BPE-50k",
   "hf_path": "EleutherAI/pythia-70m",

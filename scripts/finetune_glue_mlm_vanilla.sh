@@ -2,11 +2,10 @@
 #SBATCH --partition=gpu_a100
 #SBATCH --cpus-per-task=18
 #SBATCH --gpus=1
-#SBATCH --time=10:00:00
+#SBATCH --time=8:00:00
 #SBATCH --output=logs/glue_mlm_vanilla.log
 
 wdir=$HOME/headless-lm
-[[ ! -d $wdir/checkpoints ]] && mkdir $wdir/checkpoints
 
 # Loading modules
 module purge
@@ -19,12 +18,7 @@ source $wdir/.venv/bin/activate
 
 cd $TMPDIR
 
-ckpt_path="$wdir/checkpoints/mlm_vanilla/wikitext103-bpe_128/epoch=29-step=100000.ckpt"
-ckpt="vmlm_epoch=29-step=100000.ckpt"
-run_name="vmlm_100k"
-cp $ckpt_path $ckpt
+run_name="glue_vmlm_100k"
+model="CLTL-VUAmsterdam/BertMLM_wikitext"
 
-srun python $wdir/glue_finetuning_ckpt.py -c $wdir/configs/glue_mlm.json --ckpt_path $ckpt --run_name $run_name
-
-ls -l
-# cp -r ckpts/* $wdir/checkpoints
+srun python $wdir/glue_finetuning.py -c $wdir/configs/glue_mlm.json --model_id $model --run_name $run_name

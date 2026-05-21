@@ -3,7 +3,7 @@ import argparse
 import os
 import torch.nn as nn
 
-os.environ['TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD']='1'
+os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
 parser = argparse.ArgumentParser()
 parser.add_argument("--hf_name")
 parser.add_argument("--model_ckpt")
@@ -20,7 +20,7 @@ tokenizer = task_trainer.task.tokenizer
 
 if mode == "mlm":
     model = task_trainer.task.mlm_model
-else: 
+else:
     model = task_trainer.task.lm_model
 
 if mode == "add_head":

@@ -1,6 +1,10 @@
+.github
 .venv
+.vscode
 logs
 lightning_logs/
 __pycache__/
+/checkpoints
+/hf_models
 /tokenizers
 /datasets

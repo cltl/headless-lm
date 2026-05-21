@@ -6,7 +6,6 @@
 #SBATCH --output=logs/glue_gpt_vanilla.log
 
 wdir=$HOME/headless-lm
-[[ ! -d $wdir/checkpoints ]] && mkdir $wdir/checkpoints
 
 # Loading modules
 module purge
@@ -19,12 +18,8 @@ source $wdir/.venv/bin/activate
 
 cd $TMPDIR
 
-ckpt_path="$wdir/checkpoints/gpt_vanilla_wiki103/wikitext103-bpe/epoch=28-step=1500.ckpt"
-ckpt="vmlm_epoch=28-step=1500.ckpt"
-run_name="vgpt_1500"
-cp $ckpt_path $ckpt
+run_name="vgpt_1k5"
+model="CLTL-VUAmsterdam/GPT-pythia-70m-wikitext"
+tokenizer="CLTL/wikitext103-BPE-50k"
 
-srun python $wdir/glue_finetuning_ckpt.py -c $wdir/configs/glue_gpt.json --ckpt_path $ckpt --run_name $run_name
-
-ls -l
-# cp -r ckpts/* $wdir/checkpoints
+srun python $wdir/glue_finetuning.py -c $wdir/configs/glue_gpt.json --model_id $model --run_name $run_name -t $tokenizer
